@@ -8,61 +8,83 @@ class ListNode:
 
 
 class Solution:
-    # todo Completely remaster this method with moving all non-None values to the left
     def mergeKLists(self, lists: List[ListNode]) -> ListNode:
-        result_ptr = None
+        size = self.initial_sort(lists)
+        cur_min = 10 ** 4 + 1
+        result_node = None
         last = None
-        for i in range(len(lists) - 1, -1, -1):
-            if not lists[i]:
-                del lists[i]
-        while len(lists):
-            index = 0  # the index of the node with the smallest value
-            for i in range(1, len(lists)):
-                if lists[i].val is not None and lists[i].val < lists[index].val:
+        while size:
+            index = 0
+            for i in range(0, size):
+                if lists[i].val <= lists[index].val:
                     index = i
+                    if lists[i].val == cur_min:
+                        break
+            cur_min = lists[index].val
             if last:
                 last.next = lists[index]
-                last = lists[index]
+                last = last.next
             else:
-                result_ptr = lists[index]
-                last = lists[index]
-            if last.next:
-                lists[index] = last.next
-            else:
-                del lists[index]
-        return result_ptr
+                result_node = lists[index]
+                last = result_node
+            lists[index] = last.next
+            if not last.next:
+                size -= 1
+                lists[index], lists[size] = lists[size], None
+        return result_node
 
-    def mergeKLists_new(self, lists: List[ListNode]) -> ListNode:
-        size = self.remove_initial_nones(lists)
-
-    def remove_initial_nones(self, lists: List[ListNode]) -> int:
-        '''
-        :param lists: all not-none values will be on the left, all none values - on the right
-        :return: the new size of array
-        '''
-        # todo Implement this method
-        length = len(lists)
-        put_i, take_i = 0, length - 1,
-        # while put_i <= take_i:
-        while put_i <= take_i:
-            while lists[put_i] and put_i < length - 1:
+    def initial_sort(self, lists: List[ListNode]) -> int:
+        """
+        all valid values will be shifted to the left, all Nones (optional) - to the right.
+        :param lists:
+        :return: the new size of the array
+        """
+        put_i, take_i = 0, len(lists) - 1,
+        while True:
+            while put_i <= take_i and lists[put_i]:
                 put_i += 1
-            while not lists[take_i] and take_i >= 0:
-                    take_i -= 1
+            while take_i >= put_i and not lists[take_i]:
+                take_i -= 1
             if put_i > take_i:
                 break
             lists[put_i], lists[take_i] = lists[take_i], None
         return put_i
 
+    def mergeKLists2(self, lists: List[ListNode]) -> ListNode:
+        unboxed: List[int] = []
+        for lst in lists:
+            while lst is not None:
+                unboxed.append(lst.val)
+                lst = lst.next
+        if not unboxed:
+            return None
+        unboxed.sort(reverse=True)
+        result = ListNode(unboxed[0])
+
+        for i in range(1, len(unboxed)):
+            result = ListNode(unboxed[i], result)
+        return result
 
 
-def test(index: int, lists: List[ListNode]):
-    lists_of_ints = list(map(node_to_list, lists))
-    result = node_to_list(Solution().mergeKLists_new(lists))
-    print(f'''Test #{index}
-lists:  {lists_of_ints};
-result: {result}
+indexes = [0]
+
+
+def next_index() -> int:
+    indexes[0] += 1
+    return indexes[0]
+
+
+def test(lists: List[ListNode]):
+    initial_lists = list_of_nodes_to_list(lists)
+    result = Solution().mergeKLists2(lists)
+    print(f'''Test #{next_index()}
+initial lists: {initial_lists};
+       result: {node_to_list(result)}
 ''')
+
+
+def list_of_nodes_to_list(lst: List[ListNode]):
+    return list(map(node_to_list, lst))
 
 
 def node_to_list(node: ListNode) -> List[int]:
@@ -73,23 +95,11 @@ def node_to_list(node: ListNode) -> List[int]:
     return result
 
 
-# # [[1,4,5],[1,3,4],[2,6]]
-# lists: List[ListNode] = [
-#     ListNode(1, ListNode(4, ListNode(5))),
-#     ListNode(1, ListNode(3, ListNode(4))),
-#     ListNode(2, ListNode(6))
-# ]
-# test(1, lists)
-
-# lists = []
-# test(2, lists)
-
-# lists = [None]
-# test(3, lists)
-
-lists = [None, None]
-test(4, lists)
-
-# lists = [ListNode(6), None, None, ListNode(1, ListNode(5, ListNode(7))),
-#          None, ListNode(-1, ListNode(9)), None, None, ListNode(10), ListNode(-10)]
-# test(5, lists)
+test([])
+test([None])
+test([None, None])
+test([ListNode(5)])
+test([None, ListNode(5, ListNode(6))])
+test([ListNode(6), ListNode(5), None, ListNode(5, ListNode(6))])
+test([ListNode(2), None, ListNode(5), None, None, ListNode(3), None, None])
+test([None, None, None, ListNode(2, ListNode(3, ListNode(5))), None, ListNode(-5, ListNode(-3, ListNode(-2, ListNode(3, ListNode(5))))), None, None, ListNode(-5, ListNode(5)), None, None])
