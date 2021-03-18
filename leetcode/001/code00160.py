@@ -8,14 +8,14 @@ class ListNode:
 
 
 class Solution:
-    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+    def get_intersection_node(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
         """
         https://leetcode.com/problems/interseicton-of-two-linked-lists/
         """
         if not headA or not headB:
             return None
-        end_a, count_a = self.walkToEnd(headA)
-        end_b, count_b = self.walkToEnd(headB)
+        end_a, count_a = self.walk_to_end(headA)
+        end_b, count_b = self.walk_to_end(headB)
         if end_a is not end_b:
             return None
         min_count = min(count_a, count_b)
@@ -27,7 +27,7 @@ class Solution:
         return headA
 
     @staticmethod
-    def walkToEnd(head: ListNode) -> (Optional[ListNode], int):
+    def walk_to_end(head: ListNode) -> (Optional[ListNode], int):
         count = 1 if head else 0
         while head and head.next:
             head = head.next
@@ -73,7 +73,7 @@ index = 0
 def test(head_a: ListNode, head_b: ListNode, expected_node: ListNode):
     global index
     index += 1
-    node = Solution().getIntersectionNode(head_a, head_b)
+    node = Solution().get_intersection_node(head_a, head_b)
     print(f'''Test #{index}
 ----------------
 connection nodes match: {expected_node == node}
